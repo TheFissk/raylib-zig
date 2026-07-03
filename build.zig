@@ -181,6 +181,11 @@ pub fn build(b: *std.Build) !void {
             .desc = "Shows picking in 3d mode",
         },
         .{
+            .name = "automation_events",
+            .path = "examples/core/automation_events.zig",
+            .desc = "Demonstrates automation events",
+        },
+        .{
             .name = "drop_files",
             .path = "examples/core/drop_files.zig",
             .desc = "Demonstrates how to implement a drop files functionality",

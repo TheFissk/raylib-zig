@@ -166,6 +166,11 @@ pub fn build(b: *std.Build) !void {
             .desc = "Shows basic 3d camera initialization",
         },
         .{
+            .name = "3d_camera_fps",
+            .path = "examples/core/3d_camera_fps.zig",
+            .desc = "Shows first person camera movement",
+        },
+        .{
             .name = "2d_camera_mouse_zoom",
             .path = "examples/core/2d_camera_mouse_zoom.zig",
             .desc = "Shows mouse zoom demo",

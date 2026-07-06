@@ -35,7 +35,7 @@ pub fn main() !void {
 
     var show_message_box = false;
 
-    const color_int = rg.getStyle(.default, .{ .default = .background_color });
+    const color_int = rg.getStyle(.default, .background_color);
 
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();

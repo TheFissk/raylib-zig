@@ -67,6 +67,37 @@ pub const Control = enum(c_int) {
     statusbar,
 };
 
+fn MergedProperty(comptime Other: type) type {
+    const all = @typeInfo(ControlProperty).@"enum".fields ++ @typeInfo(Other).@"enum".fields;
+    comptime var names: [all.len][:0]const u8 = undefined;
+    comptime var values: [all.len]c_int = undefined;
+
+    inline for (all, 0..) |field, i| {
+        names[i] = field.name;
+        values[i] = field.value;
+    }
+
+    return @Enum(c_int, .exhaustive, &names, &values);
+}
+
+fn PropertyType(comptime control: Control) type {
+    return switch (control) {
+        .default => MergedProperty(DefaultProperty),
+        .toggle => MergedProperty(ToggleProperty),
+        .slider => MergedProperty(SliderProperty),
+        .progressbar => MergedProperty(ProgressBarProperty),
+        .scrollbar => MergedProperty(ScrollBarProperty),
+        .checkbox => MergedProperty(CheckBoxProperty),
+        .combobox => MergedProperty(ComboBoxProperty),
+        .dropdownbox => MergedProperty(DropdownBoxProperty),
+        .textbox => MergedProperty(TextBoxProperty),
+        .valuebox => MergedProperty(ValueBoxProperty),
+        .listview => MergedProperty(ListViewProperty),
+        .colorpicker => MergedProperty(ColorPickerProperty),
+        .label, .button, .control11, .statusbar => ControlProperty,
+    };
+}
+
 pub const ControlProperty = enum(c_int) {
     border_color_normal = 0,
     base_color_normal,
@@ -93,22 +124,6 @@ pub const DefaultProperty = enum(c_int) {
     text_line_spacing,
     text_alignment_vertical,
     text_wrap_mode,
-};
-
-pub const Property = union(enum) {
-    control: ControlProperty,
-    default: DefaultProperty,
-    toggle: ToggleProperty,
-    slider: SliderProperty,
-    progressBar: ProgressBarProperty,
-    scrollBar: ScrollBarProperty,
-    checkBox: CheckBoxProperty,
-    comboBox: ComboBoxProperty,
-    dropdownBox: DropdownBoxProperty,
-    textBox: TextBoxProperty,
-    valueBox: ValueBoxProperty,
-    listView: ListViewProperty,
-    colorPicker: ColorPickerProperty,
 };
 
 pub const ToggleProperty = enum(c_int) {
@@ -439,21 +454,13 @@ pub const IconName = enum(c_int) {
 };
 
 /// Set one style property
-pub fn setStyle(control: Control, comptime property: Property, value: i32) void {
-    const property_int: c_int = switch (property) {
-        inline else => |val| @intCast(@intFromEnum(val)),
-    };
-
-    cdef.GuiSetStyle(control, property_int, @as(c_int, value));
+pub fn setStyle(comptime control: Control, property: PropertyType(control), value: i32) void {
+    cdef.GuiSetStyle(control, @intFromEnum(property), @as(c_int, value));
 }
 
 /// Get one style property
-pub fn getStyle(control: Control, comptime property: Property) i32 {
-    const property_int: c_int = switch (property) {
-        inline else => |val| @intCast(@intFromEnum(val)),
-    };
-
-    return @as(i32, cdef.GuiGetStyle(control, property_int));
+pub fn getStyle(comptime control: Control, property: PropertyType(control)) i32 {
+    return @as(i32, cdef.GuiGetStyle(control, @intFromEnum(property)));
 }
 
 /// Get raygui icons data pointer
